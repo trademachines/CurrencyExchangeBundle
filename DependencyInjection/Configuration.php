@@ -41,7 +41,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('cache')
                     ->isRequired()
                     ->info('set cache pool service id')
-                    ->example('stash.memcache')
+                    ->example('doctrine_cache.providers.default')
                 ->end()
                 ->arrayNode('currencies')
                     ->useAttributeAsKey('name')

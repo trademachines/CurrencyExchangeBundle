@@ -25,9 +25,9 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     public function testConfiguration()
     {
         $processor = new Processor();
-        $processorConfig = $processor->processConfiguration(new Configuration(), [['cache' => 'stash.files_cache']]);
+        $processorConfig = $processor->processConfiguration(new Configuration(), [['cache' => 'doctrine_cache.providers.default']]);
         $expectedConfiguration = [
-            'cache' => 'stash.files_cache',
+            'cache' => 'doctrine_cache.providers.default',
             'es_manager' => 'default',
             'default_currency' => 'EUR',
             'currencies' => [],

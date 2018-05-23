@@ -33,7 +33,7 @@ class ONGRCurrencyExchangeExtensionTest extends \PHPUnit_Framework_TestCase
         $container->setDefinition('my_service', new Definition());
 
         $config = [
-            'cache' => 'stash.memcache',
+            'cache' => 'doctrine_cache.providers.default',
             'driver' => ['service' => 'ongr_currency_exchange.open_exchange_driver'],
         ];
         // Case #0 we need currency rates service.
@@ -70,7 +70,7 @@ class ONGRCurrencyExchangeExtensionTest extends \PHPUnit_Framework_TestCase
     {
         $config = [
             'ongr_currency_exchange' => [
-                'cache' => 'stash.files_cache',
+                'cache' => 'doctrine_cache.providers.default',
                 'driver' => [],
             ],
         ];

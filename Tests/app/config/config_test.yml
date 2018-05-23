@@ -46,21 +46,15 @@ ongr_elasticsearch:
             mappings:
                 - ONGRCurrencyExchangeBundle
 
-stash:
-    caches:
-        files:
-            drivers: [ FileSystem ]
-            FileSystem:
-                dirSplit:               2
-                path:                   %kernel.cache_dir%/stash
-                filePermissions:        0660
-                dirPermissions:         0770
-                memKeyLimit:            20
+doctrine_cache:
+    providers:
+        default:
+            array: ~
 
 ongr_currency_exchange:
     es_manager: default
     default_currency: EUR
-    cache: stash.files_cache
+    cache: doctrine_cache.providers.default
     separators:
         decimal: ','
         thousands: '.'

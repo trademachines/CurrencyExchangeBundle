@@ -11,6 +11,7 @@
 
 namespace ONGR\CurrencyExchangeBundle\Service;
 
+use Doctrine\Common\Cache\Cache;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use ONGR\CurrencyExchangeBundle\Currency\CurrencyDriverInterface;
 use ONGR\CurrencyExchangeBundle\Document\CurrencyDocument;
@@ -22,14 +23,17 @@ use ONGR\ElasticsearchBundle\ORM\Manager;
 use ONGR\ElasticsearchBundle\ORM\Repository;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Stash\Interfaces\ItemInterface;
-use Stash\Interfaces\PoolInterface;
 
 /**
  * This class provides currency rates.
  */
 class CurrencyRatesService implements LoggerAwareInterface
 {
+    /**
+     * @var string
+     */
+    private static $CACHE_KEY = 'ongr_currency';
+
     use LoggerAwareTrait;
 
     /**
@@ -43,9 +47,9 @@ class CurrencyRatesService implements LoggerAwareInterface
     private $driver;
 
     /**
-     * @var PoolInterface
+     * @var Cache
      */
-    private $pool;
+    private $cache;
 
     /**
      * @var Manager
@@ -55,16 +59,16 @@ class CurrencyRatesService implements LoggerAwareInterface
     /**
      * @param CurrencyDriverInterface $driver  Currency exchange driver.
      * @param Manager                 $manager ES Manager.
-     * @param PoolInterface           $pool    Cache pool.
+     * @param Cache                   $cache   Cache.
      */
     public function __construct(
         CurrencyDriverInterface $driver,
         Manager $manager,
-        PoolInterface $pool
+        Cache $cache
     ) {
-        $this->driver = $driver;
+        $this->driver  = $driver;
         $this->manager = $manager;
-        $this->pool = $pool;
+        $this->cache   = $cache;
     }
 
     /**
@@ -79,9 +83,8 @@ class CurrencyRatesService implements LoggerAwareInterface
             return $this->rates;
         }
 
-        $item = $this->getCachedRates();
-        $this->rates = $item->get();
-        if (isset($this->rates)) {
+        $this->rates = $this->getCachedRates();
+        if (false !== $this->rates) {
             return $this->rates;
         }
 
@@ -140,15 +143,15 @@ class CurrencyRatesService implements LoggerAwareInterface
      */
     private function updateRatesCache($rates)
     {
-        $this->getCachedRates()->set($rates);
+        $this->cache->save(static::$CACHE_KEY, $rates);
     }
 
     /**
-     * @return ItemInterface
+     * @return mixed|false
      */
     private function getCachedRates()
     {
-        return $this->pool->getItem('ongr_currency');
+        return $this->cache->fetch(static::$CACHE_KEY);
     }
 
     /**
