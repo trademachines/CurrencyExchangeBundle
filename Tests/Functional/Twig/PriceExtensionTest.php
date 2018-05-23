@@ -11,9 +11,8 @@
 
 namespace ONGR\CurrencyExchangeBundle\Tests\Functional\Twig;
 
-use ONGR\CurrencyExchangeBundle\Service\CurrencyExchangeService;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use ONGR\CurrencyExchangeBundle\Twig\PriceExtension;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
  * Class PriceExtensionTest.
@@ -27,16 +26,25 @@ class PriceExtensionTest extends WebTestCase
      */
     public function testGetPriceList()
     {
+        $currencyService = $this->getMockBuilder('ONGR\CurrencyExchangeBundle\Service\CurrencyExchangeService')
+            ->setMethods(['calculateRate'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $callback        = function ($amount, $toCurrency, $fromCurrency = null) {
+            return $amount;
+        };
+        $currencyService->expects($this->any())->method('calculateRate')->willReturnCallback($callback);
         $container = self::createClient()->getContainer();
-        $twig = $container->get('twig');
+        $twig      = $container->get('twig');
         /** @var PriceExtension $extension */
         $extension = $container->get('ongr_currency_exchange.twig.price_extension');
+        $extension->setCurrencyExchangeService($currencyService);
         $currencies = ['EUR', 'LTL'];
         $extension->setToListMap($currencies);
         $extension->setFormatsMap(array_combine($currencies, ['%s EUR', '%s LTL']));
+        $result = $extension->getPriceList($twig, 2500);
 
-        $result = $extension->getPriceList($twig, 1000);
-        $startPrefix = '<span class="currency currency-eur">1.000 EUR</span>';
+        $startPrefix = '<span class="currency currency-eur">2.500 EUR</span>';
         $endPrefix = 'LTL</span>';
         $this->assertStringStartsWith($startPrefix, trim($result));
         $this->assertStringEndsWith($endPrefix, trim($result));
