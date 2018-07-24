@@ -44,4 +44,9 @@ class EcbDriver implements CurrencyDriverInterface
     {
         return 'EUR';
     }
+
+   public function setAppId($something)
+   {
+        // blank
+   }
 }
